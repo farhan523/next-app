@@ -1,0 +1,12 @@
+/* header .logo {
+  width: 248px;
+} */
+header nav ul .main-list {
+  
+  cursor: pointer;
+}
+header nav ul li .header-absolute-list {
+  top: 88px;
+  left: -27px;
+  right: -27px;
+}

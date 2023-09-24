@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://fleischerscholars.com
+
+# Sitemaps
+Sitemap: https://fleischerscholars.com/sitemap.xml

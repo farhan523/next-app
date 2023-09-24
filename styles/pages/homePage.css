@@ -1,0 +1,86 @@
+/* Homepage hero section */
+.homeHero {
+  background-image: url("/static/img/cardLaptop.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.homeHero .customSelect .option:hover {
+  background-color: #0067b2;
+}
+.homeHero
+  .customSelect
+  .option:hover
+  .homeHero
+  .customSelect
+  .option
+  .brandBlue {
+  color: white !important;
+}
+@media (min-width: 1366px) {
+  .homeHero {
+    height: 800px;
+    background-image: url("/static/img/cardLaptop.jpeg");
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+}
+/* Homepage cards section */
+.homecardsContainer {
+  padding-top: 118px;
+  padding-bottom: 118px;
+}
+.homecardsContainer .cardImage {
+  min-height: 300px;
+  background-position: center;
+}
+.homecardsContainer .detail {
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+}
+
+.homecardsContainer .detailText {
+  margin-top: 109px;
+}
+@media (min-width: 1024px) {
+  .homecardsContainer .detailText {
+    line-height: 50px;
+  }
+
+  .line {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .line {
+    padding: 3rem;
+  }
+}
+
+@media (min-width: 320px) {
+  .line {
+    padding: 2rem;
+  }
+}
+
+/* Homepage meet section */
+.mortonImage {
+    width: 266px;
+      right: -195px;
+      top: -17px;
+    top: -17px;
+  }
+  @media (min-width: 1600px) {
+    .mortonImage {
+      width: 466px;
+      right: -320px;
+      top: -17px;
+    }
+  }
+  .bookPhoto {
+    width: 435px;
+    left: -320px;
+    top: -17px;
+  }
+  

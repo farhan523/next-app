@@ -1,0 +1,95 @@
+module.exports = {
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/flowbite/**/*.js",
+  ],
+  variantOrder: ["first", "last", "odd", "even"],
+  darkMode: "media", // or 'media' or 'class'
+  theme: {
+    extend: {
+      backgroundImage: {
+        "hero-pattern": `url("/static/img/numbersPattern.svg"), linear-gradient(89.84deg, #ef5741 1.79%, #f39764 98.42%)`,
+        "naf-drivingEducation": `url("/static/img/drivingEducation.png")`,
+        gradient: "linear-gradient(89.84deg, #ef5741 1.79%, #f39764 98.42%)",
+        "gradient-darken":
+          "linear-gradient(89.84deg, #ef5741 1.79%, #f39764 98.42%)",
+        "about-hero-pattern": 'url("/static/img/heroPatternImage.png")',
+        readMore: "linear-gradient(91.62deg, #EE6E5C 15.43%, #FFB388 107.15%)",
+      },
+      colors: {
+        brandBlue: "#0067B2",
+        brandBlue1: "#126CAB",
+        brandBlueLighten: "#8CBBDD",
+        brandBlueLight: "#EFF6FB",
+        brandBlueDark: "#00477B",
+        brandOrange: "#fa9359",
+        brandOrangeDark: "#eb7838",
+        brandOrangeLighten: "#EE6E5C",
+        brandOrangeSlideInActive: "#6CB5EA",
+        brandOrangeGradientFrom: "#ff6a57",
+        brandOrangeGradientTo: "#ff9b74",
+        brandOrangeGradient:
+          "linear-gradient(90.97deg, #FF6454 -4.58%, #FFA67B 94.23%)",
+        brandOrangeRed: "#FF6957",
+        themeGray: "#f4f9fc",
+        brandBlack: "#3e3e3e",
+        brandBlackLight: "#121212",
+        brandLightBlue: "#0cacdf",
+        brandBorder: "#e5e5e5",
+        inputBorder: "#e0e0e0",
+        placeholderColor: "#bababa",
+        inputFocus: "#fdfbfb",
+        icecream: "#E5F0F7",
+        icecreamDark: "#D4E6F1",
+        silver: "#AEAEAE",
+        silverLight: "#979797",
+        silverLight1: "#7E7E7E",
+        smallBrand: "#B6B6B6",
+        success: "#41DC68",
+        gray: "#C2C2C2",
+        lightGray: "#E3EEF5",
+        progressGray: "#DAE8F1",
+      },
+      lineHeight: {
+        79: "79px",
+        33: "33px",
+        82: "82px",
+        72: "72px",
+      },
+      width: {
+        thirtyPercent: "30%",
+      },
+      boxShadow: {
+        newsCard: "0 0 40px -12px rgba(0, 0, 0, 0.25)",
+        bigBlue: "0px 0px 156px 66px #0067b2",
+        bigOrange: "0px 0px 156px 66px #fa9359",
+        imagCard: "0px 2px 20px rgba(0, 0, 0, 0.05)",
+        downLoadCard: "0px 1.43169px 14.3169px rgba(0, 0, 0, 0.05)",
+        searchIcon: "2.44154px 4.88308px 3.66231px rgba(0, 0, 0, 0.05)",
+        audioCard: "rgba(3, 102, 214, 0.3) 0px 0px 0px 3px",
+      },
+      maxWidth: {
+        100: "120px",
+      },
+      minHeight: {
+        3: "3rem",
+      },
+      maxHeight: {
+        3: "3rem",
+      },
+    },
+    screens: {
+      xs: "350px",
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      "2xl": "1536px",
+    },
+  },
+  variants: {
+    extend: {},
+  },
+  plugins: [require("flowbite/plugin"), require("@tailwindcss/line-clamp")],
+};
