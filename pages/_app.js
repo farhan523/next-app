@@ -49,19 +49,8 @@ function MyApp({ Component, pageProps }) {
   useEffect(() => {
     // if (loading) return;
 
-    router.events.on('routeChangeComplete', ()=>{
-      if (
-        localStorage.getItem("tabsOpen") == 0 &&
-        performance.getEntriesByType("navigation")[0].type == "navigate" &&
-        (window.history.length == 2 || localStorage.getItem("previousTab") == "/login") &&
-        !localStorage.getItem("homeButtonClicked") &&
-        localStorage.getItem("token")
-      ) {
-        console.log("data send",localStorage.getItem("logs"));
-        localStorage.removeItem("logs");
-      }
-    })
    
+    
     
     (async () => {
       let user;
@@ -120,6 +109,7 @@ function MyApp({ Component, pageProps }) {
         dispatch(setIpAddress(ipAddress.ip))
       }
     })();
+    
     // if (currentLoggedInQueryData && currentLoggedInQueryData.me) {
     //   dispatch(
     //     setCurrentUser({
@@ -132,21 +122,17 @@ function MyApp({ Component, pageProps }) {
     //   if (router.route.startsWith("/dashboard")) router.push("/login");
     // }
 
+    
 
-    router.events.on('routeChangeComplete',()=>{
-      if (window.history.length > 2) localStorage.removeItem("homeButtonClicked");
-
-      // Check if this is the first tab
-      if (localStorage.getItem("tabsOpen") === null) {
-        localStorage.setItem("tabsOpen", "1");
-      } else {
-        // Increment the count of open tabs
-        let tabsOpen = parseInt(localStorage.getItem("tabsOpen"));
-        tabsOpen++;
-        localStorage.setItem("tabsOpen", tabsOpen.toString());
-      }
-    })
-   
+    // Check if this is the first tab
+    if (localStorage.getItem("tabsOpen") === null) {
+      localStorage.setItem("tabsOpen", "1");
+    } else {
+      // Increment the count of open tabs
+      let tabsOpen = parseInt(localStorage.getItem("tabsOpen"));
+      tabsOpen++;
+      localStorage.setItem("tabsOpen", tabsOpen.toString());
+    }
 
     // Event listener for tab close
     const onTabClose = () => {
@@ -163,21 +149,36 @@ function MyApp({ Component, pageProps }) {
     };
 
     window.addEventListener("beforeunload", onTabClose);
-
-    router.events.on('routeChangeComplete',()=>{
-      if(router.pathname == "/" && localStorage.getItem("token"))
-      dispatch(logActivity(`user has visited the home route`));
-       else if(localStorage.getItem("token"))
-      dispatch(logActivity(`user has visited the route, ${router.pathname}`))
-  
-      return () => {
-        // Cleanup the event listener when the component unmounts
-        window.removeEventListener("beforeunload", onTabClose);
-  
-      };
-    })
+ 
+        return () => {
+          // Cleanup the event listener when the component unmounts
+          window.removeEventListener("beforeunload", onTabClose);
     
+        };
   }, []);
+  
+  useEffect(()=>{
+
+    if (
+      localStorage.getItem("tabsOpen") == 0 &&
+      performance.getEntriesByType("navigation")[0].type == "navigate" &&
+      (window.history.length == 2 || localStorage.getItem("previousTab") == "/login") &&
+      !localStorage.getItem("homeButtonClicked") &&
+      localStorage.getItem("token")
+    ) {
+      console.log("data send",localStorage.getItem("logs"));
+      localStorage.removeItem("logs");
+    }
+
+    if (window.history.length > 2) localStorage.removeItem("homeButtonClicked");
+
+    if(router.pathname == "/" && localStorage.getItem("token"))
+    dispatch(logActivity(`user has visited the home route`));
+else if(localStorage.getItem("token"))
+    dispatch(logActivity(`user has visited the route, ${router.pathname}`))
+
+
+  },[router])
 
   return (
     <>
