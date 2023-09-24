@@ -126,6 +126,8 @@ function MyApp({ Component, pageProps }) {
     dispatch(logActivity(`user has visited the home route`));
     else if(localStorage.getItem("token"))
     dispatch(logActivity(`user has visited the route, ${router.pathname}`))
+    if(!localStorage.getItem("token"))
+        localStorage.removeItem("logs");
   },[debouncedRouterPathname])
 
   useEffect(() => {
