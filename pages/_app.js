@@ -168,7 +168,7 @@ function MyApp({ Component, pageProps }) {
           window.removeEventListener("beforeunload", onTabClose);
     
         };
-  }, [router.pathname]);
+  }, [router]);
 
   return (
     <>
