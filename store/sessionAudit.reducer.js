@@ -67,7 +67,7 @@ const sessionAuditSlice = createSlice({
     setIpAddress:(state,action) =>{
       state.ipAddress = action.payload;
       state.sessionTime.leaveTime = getDateAndTime()
-      setStateInLocalStorage(state, "joinTime");
+      setStateInLocalStorage(state, "ipAddress");
     }
   },
 });
@@ -81,4 +81,5 @@ export const {
   setOperatingSystem,
   setSessionJoinTime,
   setSessionLeaveTime,
+  setIpAddress
 } = sessionAuditSlice.actions;
