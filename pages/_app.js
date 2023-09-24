@@ -48,19 +48,6 @@ function MyApp({ Component, pageProps }) {
   }, []);
   useEffect(() => {
     // if (loading) return;
-
-   
-    if (
-      localStorage.getItem("tabsOpen") == 0 &&
-      performance.getEntriesByType("navigation")[0].type == "navigate" &&
-      (window.history.length == 2 || localStorage.getItem("previousTab") == "/login") &&
-      !localStorage.getItem("homeButtonClicked") &&
-      localStorage.getItem("token")
-    ) {
-      console.log("data send",localStorage.getItem("logs"));
-      localStorage.removeItem("logs");
-    }
-    
     (async () => {
       let user;
       let localUser = window.localStorage.getItem("user");
@@ -105,18 +92,7 @@ function MyApp({ Component, pageProps }) {
         // if (router.route.startsWith("/login")) router.push("/dashboard");
       }
 
-      if ((!localStorage.getItem("logs") || JSON.parse(localStorage.getItem("logs")).user_id == null ) && localStorage.getItem("token")) {
-        const { os, browser } = getUserAgentAndOperatingSystem();
-        const dateTime = getDateAndTime();
-        dispatch(setUserId(user.id));
-        dispatch(setBrowser(browser));
-        dispatch(setOperatingSystem(os));
-        dispatch(setSessionJoinTime(dateTime));
-        let ipAddress = await fetch("/api/hello")
-        ipAddress = await ipAddress.json();
-        console.log("ipaddress",ipAddress.ip)
-        dispatch(setIpAddress(ipAddress.ip))
-      }
+     
     })();
     // if (currentLoggedInQueryData && currentLoggedInQueryData.me) {
     //   dispatch(
@@ -130,7 +106,44 @@ function MyApp({ Component, pageProps }) {
     //   if (router.route.startsWith("/dashboard")) router.push("/login");
     // }
 
-    if (window.history.length > 2) localStorage.removeItem("homeButtonClicked");
+    
+    
+        return () => {
+          // Cleanup the event listener when the component unmounts
+          // window.removeEventListener("beforeunload", onTabClose);
+    
+        };
+  }, []);
+
+  if (
+    localStorage.getItem("tabsOpen") == 0 &&
+    performance.getEntriesByType("navigation")[0].type == "navigate" &&
+    (window.history.length == 2 || localStorage.getItem("previousTab") == "/login") &&
+    !localStorage.getItem("homeButtonClicked") &&
+    localStorage.getItem("token")
+  ) {
+    console.log("data send",localStorage.getItem("logs"));
+    localStorage.removeItem("logs");
+  }
+
+  (async function(){
+    if ((!localStorage.getItem("logs") || JSON.parse(localStorage.getItem("logs")).user_id == null ) && localStorage.getItem("token")) {
+      const { os, browser } = getUserAgentAndOperatingSystem();
+      const dateTime = getDateAndTime();
+      let currentUser = await getCurrentUserAPI();
+        user = currentUser?.data;
+      dispatch(setUserId(user.id));
+      dispatch(setBrowser(browser));
+      dispatch(setOperatingSystem(os));
+      dispatch(setSessionJoinTime(dateTime));
+      let ipAddress = await fetch("/api/hello")
+      ipAddress = await ipAddress.json();
+      console.log("ipaddress",ipAddress.ip)
+      dispatch(setIpAddress(ipAddress.ip))
+    }
+  })()
+
+  if (window.history.length > 2) localStorage.removeItem("homeButtonClicked");
 
     // Check if this is the first tab
     if (localStorage.getItem("tabsOpen") === null) {
@@ -162,13 +175,8 @@ function MyApp({ Component, pageProps }) {
         dispatch(logActivity(`user has visited the home route`));
     else if(localStorage.getItem("token"))
         dispatch(logActivity(`user has visited the route, ${router.pathname}`))
-    
-        return () => {
-          // Cleanup the event listener when the component unmounts
-          window.removeEventListener("beforeunload", onTabClose);
-    
-        };
-  }, [router]);
+  
+  
 
   return (
     <>
