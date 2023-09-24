@@ -49,11 +49,7 @@ function MyApp({ Component, pageProps }) {
   useEffect(() => {
     // if (loading) return;
 
-    fetch("/api/hello")
-    .then((response) => response.json())
-      .then((data) => console.log(data.ip))
-      .catch((error) => console.error('Error fetching IP address:', error));
-
+   
     if (
       localStorage.getItem("tabsOpen") == 0 &&
       performance.getEntriesByType("navigation")[0].type == "navigate" &&
@@ -116,6 +112,10 @@ function MyApp({ Component, pageProps }) {
         dispatch(setBrowser(browser));
         dispatch(setOperatingSystem(os));
         dispatch(setSessionJoinTime(dateTime));
+        let ipAddress = await fetch("/api/hello")
+        ipAddress = await ipAddress.json();
+        console.log("ipaddress",ipAddress.ip)
+        dispatch(setIpAddress(ipAddress.ip))
       }
     })();
     // if (currentLoggedInQueryData && currentLoggedInQueryData.me) {
