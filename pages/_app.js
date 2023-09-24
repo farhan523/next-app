@@ -22,7 +22,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { getCurrentUserAPI } from "../lib/api";
+import { getCurrentUserAPI,createLoginAudit } from "../lib/api";
 import useDebounce from "../helpers/useDebounce"
 import {
   setUserId,
@@ -51,6 +51,9 @@ function MyApp({ Component, pageProps }) {
 
   useEffect(()=>{
 
+    let logs = localStorage.getItem("logs");
+    if(logs)
+        logs = JSON.parse(logs);
     if (
       localStorage.getItem("tabsOpen") == 0 &&
       performance.getEntriesByType("navigation")[0].type == "navigate" &&
@@ -58,8 +61,63 @@ function MyApp({ Component, pageProps }) {
       !localStorage.getItem("homeButtonClicked") &&
       localStorage.getItem("token")
     ) {
-      console.log("data send",localStorage.getItem("logs"));
-      localStorage.removeItem("logs");
+
+      if(logs){
+
+        let body = {};
+        
+        if(logs.activityLogs.length != 0){
+          
+          body.user_id = JSON.parse(logs.user_id);
+          body.user = {id:JSON.parse(logs.user_id)};
+          body.browser = logs.browser;
+          body.operatingSystem = logs.operatingSystem;
+          body.ipAddress = logs.ipAddress;
+          body.joinTime = new Date(logs.sessionTime.joinTime);
+          body.leaveTime = new Date(logs.sessionTime.leaveTime);
+          body.activityLogs = JSON.stringify(logs.activityLogs);
+          createLoginAudit(body)
+          logs = null;
+          localStorage.removeItem("logs");
+        }
+      }
+         
+
+     
+      // body = {
+      //   user_id: 1,
+      //   browser: 'Chrome',
+      //   operatingSystem: 'Windows 10',
+      //   ipAddress: '192.168.0.1',
+      //   joinTime: new Date('2023-09-24T10:00:00Z'),
+      //   leaveTime: new Date('2023-09-24T11:00:00Z'),
+      //   activityLogs: { log1: 'Activity 1', log2: 'Activity 2' },
+      // }
+
+      
+    }
+
+    if(logs){
+        let body = {};
+        body.user = {id:JSON.parse(logs.user_id)};
+        body.user_id = JSON.parse(logs.user_id);
+        body.browser = logs.browser;
+        body.operatingSystem = logs.operatingSystem;
+        body.ipAddress = logs.ipAddress;
+        body.joinTime = new Date(logs.sessionTime.joinTime);
+        body.leaveTime = new Date(getDateAndTime());
+        let diff = body.leaveTime - body.joinTime;
+
+        let hours = Math.floor(diff / 3600000);
+        let minutes = Math.floor((diff % 3600000) / 60000);
+        let seconds = Math.floor((diff % 60000) / 1000);
+
+        logs.activityLogs[0] = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
+        body.activityLogs = JSON.stringify(logs.activityLogs);
+        createLoginAudit(body)
+        logs.activityLogs = [];
+        logs.sessionTime.joinTime = getDateAndTime();
+        localStorage.setItem("logs",JSON.stringify(logs))
     }
 
     if (window.history.length > 2) localStorage.removeItem("homeButtonClicked");
@@ -67,17 +125,11 @@ function MyApp({ Component, pageProps }) {
     if(router.pathname == "/" && localStorage.getItem("token"))
     dispatch(logActivity(`user has visited the home route`));
     else if(localStorage.getItem("token"))
-    dispatch(logActivity(`user has visited the route, ${router.pathname} main dispatch`))
-    console.log("routerpathname",router.pathname)
-
+    dispatch(logActivity(`user has visited the route, ${router.pathname}`))
   },[debouncedRouterPathname])
 
   useEffect(() => {
     // if (loading) return;
-
-   
-    
-    
     (async () => {
       let user;
       let localUser = window.localStorage.getItem("user");
@@ -131,7 +183,6 @@ function MyApp({ Component, pageProps }) {
         dispatch(setSessionJoinTime(dateTime));
         let ipAddress = await fetch("/api/hello")
         ipAddress = await ipAddress.json();
-        console.log("ipaddress",ipAddress.ip)
         dispatch(setIpAddress(ipAddress.ip))
       }
     })();
@@ -147,8 +198,6 @@ function MyApp({ Component, pageProps }) {
     // } else {
     //   if (router.route.startsWith("/dashboard")) router.push("/login");
     // }
-
-    
 
     // Check if this is the first tab
     if (localStorage.getItem("tabsOpen") === null) {
