@@ -23,6 +23,7 @@ import { useRouter } from "next/router";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { getCurrentUserAPI } from "../lib/api";
+import useDebounce from "../helpers/useDebounce"
 import {
   setUserId,
   setBrowser,
@@ -42,6 +43,7 @@ function MyApp({ Component, pageProps }) {
   // const userInfo = useSelector(getCurrentUser);
   const dispatch = useDispatch();
   const router = useRouter();
+  const debouncedRouterPathname = useDebounce(router.pathname, 300);
 
   useEffect(() => {
     AOS.init();
@@ -64,11 +66,11 @@ function MyApp({ Component, pageProps }) {
 
     if(router.pathname == "/" && localStorage.getItem("token"))
     dispatch(logActivity(`user has visited the home route`));
-else if(localStorage.getItem("token"))
+    else if(localStorage.getItem("token"))
     dispatch(logActivity(`user has visited the route, ${router.pathname} main dispatch`))
+    console.log("routerpathname",router.pathname)
 
-
-  },[router])
+  },[debouncedRouterPathname])
 
   useEffect(() => {
     // if (loading) return;
