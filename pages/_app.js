@@ -46,6 +46,30 @@ function MyApp({ Component, pageProps }) {
   useEffect(() => {
     AOS.init();
   }, []);
+
+  useEffect(()=>{
+
+    if (
+      localStorage.getItem("tabsOpen") == 0 &&
+      performance.getEntriesByType("navigation")[0].type == "navigate" &&
+      (window.history.length == 2 || localStorage.getItem("previousTab") == "/login") &&
+      !localStorage.getItem("homeButtonClicked") &&
+      localStorage.getItem("token")
+    ) {
+      console.log("data send",localStorage.getItem("logs"));
+      localStorage.removeItem("logs");
+    }
+
+    if (window.history.length > 2) localStorage.removeItem("homeButtonClicked");
+
+    if(router.pathname == "/" && localStorage.getItem("token"))
+    dispatch(logActivity(`user has visited the home route`));
+else if(localStorage.getItem("token"))
+    dispatch(logActivity(`user has visited the route, ${router.pathname} main dispatch`))
+
+
+  },[router])
+
   useEffect(() => {
     // if (loading) return;
 
@@ -157,29 +181,6 @@ function MyApp({ Component, pageProps }) {
         };
   }, []);
   
-  useEffect(()=>{
-
-    if (
-      localStorage.getItem("tabsOpen") == 0 &&
-      performance.getEntriesByType("navigation")[0].type == "navigate" &&
-      (window.history.length == 2 || localStorage.getItem("previousTab") == "/login") &&
-      !localStorage.getItem("homeButtonClicked") &&
-      localStorage.getItem("token")
-    ) {
-      console.log("data send",localStorage.getItem("logs"));
-      localStorage.removeItem("logs");
-    }
-
-    if (window.history.length > 2) localStorage.removeItem("homeButtonClicked");
-
-    if(router.pathname == "/" && localStorage.getItem("token"))
-    dispatch(logActivity(`user has visited the home route`));
-else if(localStorage.getItem("token"))
-    dispatch(logActivity(`user has visited the route, ${router.pathname}`))
-
-
-  },[router])
-
   return (
     <>
       <Head>
