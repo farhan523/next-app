@@ -32,8 +32,6 @@ import Logo from "../../../../static/allLogo/fleischer_logo.svg";
 import OrangeButton from "../../../NewMockupComponents/OrangeButton";
 import Image from "next/image";
 import axios from "axios";
-import { useDispatch } from "react-redux";
-import { logActivity } from "../../../../store/sessionAudit.reducer";
 
 // const workBookContent = axios.get(
 //   "https://api-dev.trustvardi.com/api/v1/workbook"
@@ -53,8 +51,7 @@ const Sidebar = ({ currentStep, stepsLength }) => {
   const userId = user && user.id;
   const router = useRouter();
   const [tocNumber, setTocNumber] = useState(null);
-  const dispatch = useDispatch();
-
+ 
   const { setIsOpen } = useTour();
 
   const items = [
@@ -473,7 +470,7 @@ const Sidebar = ({ currentStep, stepsLength }) => {
                           href={"/students/workbook?lessonId=2.4&&chapterId=2"}
                         >
                           <a
-                            onClick={()=>{dispatch(logActivity(`user visited route /students/workbook?lessonId=2.4&&chapterId=2`))}}
+                           
                             className={`w-full flex transition group justify-between cursor-pointer font-bold gap-3 
                     `}
                           >
@@ -527,7 +524,6 @@ const Sidebar = ({ currentStep, stepsLength }) => {
                     >
                       <Link href={item.link}>
                         <a
-                          onClick={()=>{dispatch(logActivity(`user visited the route ${item.link}`))}}
                           className={`w-full flex transition group justify-between cursor-pointer font-bold gap-3 
                     `}
                         >
