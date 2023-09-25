@@ -33,6 +33,25 @@ import {
   setIpAddress
 } from "../store/sessionAudit.reducer";
 
+function parseCustomDateString(dateString) {
+  const parts = dateString.split(/[ :]/); // Split by ' ' and ':'
+  const date = parts[0].split(/[-]/);
+  const year = parseInt(date[0]);
+  const month = parseInt(date[1]) - 1; // Months are 0-based in JavaScript
+  const day = parseInt(date[2]);
+  const hour = parseInt(parts[1]);
+  const minute = parseInt(parts[2]);
+  const second = parseInt(parts[3]);
+  console.log("date",parts,"and",date)
+  return new Date(year, month, day, hour, minute, second);
+}
+
+function toISODateString(date) {
+  return date.toISOString();
+}
+
+"a"
+
 function MyApp({ Component, pageProps }) {
   // const {
   //   data: currentLoggedInQueryData,
@@ -73,10 +92,14 @@ function MyApp({ Component, pageProps }) {
           body.browser = logs.browser;
           body.operatingSystem = logs.operatingSystem;
           body.ipAddress = logs.ipAddress;
-          body.joinTime = new Date(logs.sessionTime.joinTime);
-          body.leaveTime = new Date(logs.sessionTime.leaveTime);
+          let parsedJoinTime = parseCustomDateString(logs.sessionTime.joinTime)
+          let parsedLeaveTime = parseCustomDateString(logs.sessionTime.leaveTime)
+          const isoJoinTime = toISODateString(parsedJoinTime);
+          const isoLeaveTime = toISODateString(parsedLeaveTime);
+          body.joinTime = new Date(isoJoinTime);
+          body.leaveTime = new Date(isoLeaveTime);
           body.activityLogs = JSON.stringify(logs.activityLogs);
-          createLoginAudit(body)
+          // createLoginAudit(body)
           logs = null;
           localStorage.removeItem("logs");
         }
@@ -104,17 +127,27 @@ function MyApp({ Component, pageProps }) {
         body.browser = logs.browser;
         body.operatingSystem = logs.operatingSystem;
         body.ipAddress = logs.ipAddress;
-        body.joinTime = new Date(logs.sessionTime.joinTime);
-        body.leaveTime = new Date(getDateAndTime());
+        let parsedJoinTime = parseCustomDateString(logs.sessionTime.joinTime)
+        let parsedLeaveTime = parseCustomDateString(getDateAndTime())
+        const isoJoinTime = toISODateString(parsedJoinTime);
+        const isoLeaveTime = toISODateString(parsedLeaveTime);
+        console.log(logs.sessionTime.joinTime,"logs.sessionTime.joinTime")
+        console.log(parsedJoinTime,"isoJoinTime");
+        console.log(parsedLeaveTime,"isoLeaveTime")
+        body.joinTime = new Date(isoJoinTime);
+        body.leaveTime = new Date(isoLeaveTime);
         let diff = body.leaveTime - body.joinTime;
 
         let hours = Math.floor(diff / 3600000);
         let minutes = Math.floor((diff % 3600000) / 60000);
         let seconds = Math.floor((diff % 60000) / 1000);
 
-        logs.activityLogs[0] = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
-        body.activityLogs = JSON.stringify(logs.activityLogs);
-        createLoginAudit(body)
+        console.log(hours,minutes,seconds, "asasa");
+        console.log(logs.activityLogs[0],"logs.activityLogs[0]")
+         logs.activityLogs[0] = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
+          console.log(logs.activityLogs[0],"logs.activityLogs[0]")
+         body.activityLogs = JSON.stringify(logs.activityLogs);
+        // createLoginAudit(body)
         logs.activityLogs = [];
         logs.sessionTime.joinTime = getDateAndTime();
         localStorage.setItem("logs",JSON.stringify(logs))
@@ -126,8 +159,6 @@ function MyApp({ Component, pageProps }) {
     dispatch(logActivity(`user has visited the home route`));
     else if(localStorage.getItem("token"))
     dispatch(logActivity(`user has visited the route, ${router.pathname}`))
-    if(!localStorage.getItem("token"))
-        localStorage.removeItem("logs");
   },[debouncedRouterPathname])
 
   useEffect(() => {
