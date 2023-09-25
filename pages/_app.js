@@ -99,7 +99,7 @@ function MyApp({ Component, pageProps }) {
           body.joinTime = new Date(isoJoinTime);
           body.leaveTime = new Date(isoLeaveTime);
           body.activityLogs = JSON.stringify(logs.activityLogs);
-          // createLoginAudit(body)
+          createLoginAudit(body)
           logs = null;
           localStorage.removeItem("logs");
         }
@@ -147,7 +147,7 @@ function MyApp({ Component, pageProps }) {
          logs.activityLogs[0] = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
           console.log(logs.activityLogs[0],"logs.activityLogs[0]")
          body.activityLogs = JSON.stringify(logs.activityLogs);
-        // createLoginAudit(body)
+        createLoginAudit(body)
         logs.activityLogs = [];
         logs.sessionTime.joinTime = getDateAndTime();
         localStorage.setItem("logs",JSON.stringify(logs))
