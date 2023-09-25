@@ -120,7 +120,7 @@ function MyApp({ Component, pageProps }) {
       
     }
 
-    if(logs){
+    if(logs && logs.activityLogs.length != 0){
         let body = {};
         body.user = {id:JSON.parse(logs.user_id)};
         body.user_id = JSON.parse(logs.user_id);
@@ -159,6 +159,8 @@ function MyApp({ Component, pageProps }) {
     dispatch(logActivity(`user has visited the home route`));
     else if(localStorage.getItem("token"))
     dispatch(logActivity(`user has visited the route, ${router.pathname}`))
+    
+    if(!localStorage.getItem("token"))localStorage.removeItem("logs");
   },[debouncedRouterPathname])
 
   useEffect(() => {
