@@ -22,7 +22,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { getCurrentUserAPI,createLoginAudit } from "../lib/api";
+import { getCurrentUserAPI,createLoginAudit,getLoginAuditById,updateLoginAudit } from "../lib/api";
 import useDebounce from "../helpers/useDebounce"
 import {
   setUserId,
@@ -30,8 +30,10 @@ import {
   setOperatingSystem,
   setSessionJoinTime,
   logActivity,
-  setIpAddress
+  setIpAddress,
+  setSessionLeaveTime
 } from "../store/sessionAudit.reducer";
+import { NULL } from "sass";
 
 function MyApp({ Component, pageProps }) {
   // const {
@@ -66,7 +68,7 @@ function MyApp({ Component, pageProps }) {
 
         let body = {};
         
-        if(logs.activityLogs.length != 0){
+        if(logs.activityLogs.length != 0 && logs.user_id != null){
           
           body.user_id = JSON.parse(logs.user_id);
           body.user = {id:JSON.parse(logs.user_id)};
@@ -79,15 +81,33 @@ function MyApp({ Component, pageProps }) {
           const isoLeaveTime = toISODateString(parsedLeaveTime);
           body.joinTime = new Date(isoJoinTime);
           body.leaveTime = new Date(isoLeaveTime);
+          let diff = body.leaveTime - body.joinTime;
+
+          let hours = Math.floor(diff / 3600000);
+          let minutes = Math.floor((diff % 3600000) / 60000);
+          let seconds = Math.floor((diff % 60000) / 1000);
+          logs.activityLogs[0] = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
           body.activityLogs = JSON.stringify(logs.activityLogs);
-          createLoginAudit(body)
+          let currentLog = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`;
+          
+          (async function(){
+            let logid = localStorage.getItem("logid");
+            logid = +logid;
+            let existingLog = await getLoginAuditById(logid);
+            let activityLogs = JSON.parse(existingLog.data.data.attributes.activityLogs);
+            activityLogs.push(currentLog);
+            activityLogs = JSON.stringify(activityLogs);
+            updateLoginAudit(logid,activityLogs,body.leaveTime)
+            console.log(existingLog,"existingLog")
+        })()
           logs = null;
           localStorage.removeItem("logs");
+          localStorage.removeItem("logid")
+
         }
       }
          
-
-     
+      console.log("first time load ",logs)
       // body = {
       //   user_id: 1,
       //   browser: 'Chrome',
@@ -101,7 +121,7 @@ function MyApp({ Component, pageProps }) {
       
     }
 
-    if(logs && logs.activityLogs.length != 0){
+    if(logs && logs.activityLogs.length != 0 && logs.user_id != null){
         let body = {};
         body.user = {id:JSON.parse(logs.user_id)};
         body.user_id = JSON.parse(logs.user_id);
@@ -122,9 +142,24 @@ function MyApp({ Component, pageProps }) {
 
         logs.activityLogs[0] = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
         body.activityLogs = JSON.stringify(logs.activityLogs);
-        createLoginAudit(body)
+        let currentLog = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`;
+        if(!localStorage.getItem("logid"))
+            createLoginAudit(body)
+          else{
+            (async function(){
+                let logid = localStorage.getItem("logid");
+                logid = +logid;
+                let existingLog = await getLoginAuditById(logid);
+                let activityLogs = JSON.parse(existingLog.data.data.attributes.activityLogs);
+                activityLogs.push(currentLog);
+                activityLogs = JSON.stringify(activityLogs);
+                updateLoginAudit(logid,activityLogs,body.leaveTime)
+                console.log(existingLog,"existingLog")
+            })()
+          }
         logs.activityLogs = [];
         logs.sessionTime.joinTime = getDateAndTime();
+        logs.sessionTime.leaveTime = getDateAndTime();
         localStorage.setItem("logs",JSON.stringify(logs))
     }
 
@@ -226,6 +261,7 @@ function MyApp({ Component, pageProps }) {
       tabsOpen--;
 
       if (tabsOpen === 0) {
+        dispatch(setSessionLeaveTime(getDateAndTime()));
         // All tabs have been closed
         // Add your logic here
       }
