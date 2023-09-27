@@ -22,7 +22,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { getCurrentUserAPI,createLoginAudit, getLoginAuditById, updateLoginAudit } from "../lib/api";
+import { getCurrentUserAPI,createLoginAudit } from "../lib/api";
 import useDebounce from "../helpers/useDebounce"
 import {
   setUserId,
@@ -32,54 +32,6 @@ import {
   logActivity,
   setIpAddress
 } from "../store/sessionAudit.reducer";
-
-
-function sendLogsToDatabase(logs){
-  if(logs && logs.activityLogs.length > 0){
-    console.log(logs,"logs")
-    let body = {};
-    body.user = {id:JSON.parse(logs.user_id)};
-    body.user_id = JSON.parse(logs.user_id);
-    body.browser = logs.browser;
-    body.operatingSystem = logs.operatingSystem;
-    body.ipAddress = logs.ipAddress;
-    let parsedJoinTime = parseCustomDateString(logs.sessionTime.joinTime)
-    let parsedLeaveTime = parseCustomDateString(getDateAndTime())
-    const isoJoinTime = toISODateString(parsedJoinTime);
-    const isoLeaveTime = toISODateString(parsedLeaveTime);
-    body.joinTime = new Date(isoJoinTime);
-    body.leaveTime = new Date(isoLeaveTime);
-    let diff = body.leaveTime - body.joinTime;
-
-    let hours = Math.floor(diff / 3600000);
-    let minutes = Math.floor((diff % 3600000) / 60000);
-    let seconds = Math.floor((diff % 60000) / 1000);
-
-    logs.activityLogs[0] = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
-    body.activityLogs = JSON.stringify(logs.activityLogs);
-
-    (async function(){
-          if(!localStorage.getItem("logid"))
-          createLoginAudit(body)
-        else{
-         
-          let logId = Number(localStorage.getItem("logid"));
-            const loginAudit = await getLoginAuditById(logId);
-            console.log("gotLoginAudit",loginAudit  )
-            let existingLogs = JSON.parse(loginAudit.data.data.attributes.activityLogs);
-            existingLogs.push(logs.activityLogs[0]);
-            existingLogs = JSON.stringify(existingLogs);
-          
-            await updateLoginAudit(logId,existingLogs,new Date(isoLeaveTime))
-        
-        }
-        logs.activityLogs = [];
-        logs.sessionTime.joinTime = getDateAndTime();
-        localStorage.setItem("logs",JSON.stringify(logs))
-    })()
-    
-}
-}
 
 function MyApp({ Component, pageProps }) {
   // const {
@@ -92,8 +44,6 @@ function MyApp({ Component, pageProps }) {
   const dispatch = useDispatch();
   const router = useRouter();
   const debouncedRouterPathname = useDebounce(router.pathname, 300);
-
-  
 
   useEffect(() => {
     AOS.init();
@@ -112,80 +62,80 @@ function MyApp({ Component, pageProps }) {
       localStorage.getItem("token")
     ) {
 
-      // if(logs){
+      if(logs){
 
-      //   let body = {};
+        let body = {};
         
-      //   if(logs.activityLogs.length != 0){
+        if(logs.activityLogs.length != 0){
           
-      //     body.user_id = JSON.parse(logs.user_id);
-      //     body.user = {id:JSON.parse(logs.user_id)};
-      //     body.browser = logs.browser;
-      //     body.operatingSystem = logs.operatingSystem;
-      //     body.ipAddress = logs.ipAddress;
-      //     let parsedJoinTime = parseCustomDateString(logs.sessionTime.joinTime)
-      //     let parsedLeaveTime = parseCustomDateString(logs.sessionTime.leaveTime)
-      //     const isoJoinTime = toISODateString(parsedJoinTime);
-      //     const isoLeaveTime = toISODateString(parsedLeaveTime);
-      //     body.joinTime = new Date(isoJoinTime);
-      //     body.leaveTime = new Date(isoLeaveTime);
-      //     body.activityLogs = JSON.stringify(logs.activityLogs);
-      //     // createLoginAudit(body)
-      //     logs = null;
-      //   }
-      // }
-        
+          body.user_id = JSON.parse(logs.user_id);
+          body.user = {id:JSON.parse(logs.user_id)};
+          body.browser = logs.browser;
+          body.operatingSystem = logs.operatingSystem;
+          body.ipAddress = logs.ipAddress;
+          let parsedJoinTime = parseCustomDateString(logs.sessionTime.joinTime)
+          let parsedLeaveTime = parseCustomDateString(logs.sessionTime.leaveTime)
+          const isoJoinTime = toISODateString(parsedJoinTime);
+          const isoLeaveTime = toISODateString(parsedLeaveTime);
+          body.joinTime = new Date(isoJoinTime);
+          body.leaveTime = new Date(isoLeaveTime);
+          body.activityLogs = JSON.stringify(logs.activityLogs);
+          createLoginAudit(body)
+          logs = null;
+          localStorage.removeItem("logs");
+        }
+      }
          
-      localStorage.removeItem("logs");
-      localStorage.removeItem("logid");
+
+     
+      // body = {
+      //   user_id: 1,
+      //   browser: 'Chrome',
+      //   operatingSystem: 'Windows 10',
+      //   ipAddress: '192.168.0.1',
+      //   joinTime: new Date('2023-09-24T10:00:00Z'),
+      //   leaveTime: new Date('2023-09-24T11:00:00Z'),
+      //   activityLogs: { log1: 'Activity 1', log2: 'Activity 2' },
+      // }
+
+      
     }
 
-    // if(logs && logs.activityLogs.length != 0){
-    //     let body = {};
-    //     body.user = {id:JSON.parse(logs.user_id)};
-    //     body.user_id = JSON.parse(logs.user_id);
-    //     body.browser = logs.browser;
-    //     body.operatingSystem = logs.operatingSystem;
-    //     body.ipAddress = logs.ipAddress;
-    //     let parsedJoinTime = parseCustomDateString(logs.sessionTime.joinTime)
-    //     let parsedLeaveTime = parseCustomDateString(getDateAndTime())
-    //     const isoJoinTime = toISODateString(parsedJoinTime);
-    //     const isoLeaveTime = toISODateString(parsedLeaveTime);
-    //     body.joinTime = new Date(isoJoinTime);
-    //     body.leaveTime = new Date(isoLeaveTime);
-    //     let diff = body.leaveTime - body.joinTime;
+    if(logs && logs.activityLogs.length != 0){
+        let body = {};
+        body.user = {id:JSON.parse(logs.user_id)};
+        body.user_id = JSON.parse(logs.user_id);
+        body.browser = logs.browser;
+        body.operatingSystem = logs.operatingSystem;
+        body.ipAddress = logs.ipAddress;
+        let parsedJoinTime = parseCustomDateString(logs.sessionTime.joinTime)
+        let parsedLeaveTime = parseCustomDateString(getDateAndTime())
+        const isoJoinTime = toISODateString(parsedJoinTime);
+        const isoLeaveTime = toISODateString(parsedLeaveTime);
+        body.joinTime = new Date(isoJoinTime);
+        body.leaveTime = new Date(isoLeaveTime);
+        let diff = body.leaveTime - body.joinTime;
 
-    //     let hours = Math.floor(diff / 3600000);
-    //     let minutes = Math.floor((diff % 3600000) / 60000);
-    //     let seconds = Math.floor((diff % 60000) / 1000);
+        let hours = Math.floor(diff / 3600000);
+        let minutes = Math.floor((diff % 3600000) / 60000);
+        let seconds = Math.floor((diff % 60000) / 1000);
 
-    //     logs.activityLogs[0] = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
-    //     body.activityLogs = JSON.stringify(logs.activityLogs);
-    //     if(!localStorage.getItem("logid"))
-    //         createLoginAudit(body)
-    //       else{
-    //        (async function(){
-    //         let logId = Number(localStorage.getItem("logid"));
-    //           const loginAudit = await getLoginAuditById(logId);
-    //           console.log("gotLoginAudit",loginAudit  )
-    //           let existingLogs = JSON.parse(loginAudit.data.data.attributes.activityLogs);
-    //           existingLogs.push(logs.activityLogs[0]);
-    //           existingLogs = JSON.stringify(existingLogs);
-             
-    //           await updateLoginAudit(logId,new Date(isoLeaveTime))
-    //        })()
-    //       }
-    //     logs.activityLogs = [];
-    //     logs.sessionTime.joinTime = getDateAndTime();
-    //     localStorage.setItem("logs",JSON.stringify(logs))
-    // }
-
-    console.log("logsinuseeffect",logs)
-    sendLogsToDatabase(logs);
+        logs.activityLogs[0] = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
+        body.activityLogs = JSON.stringify(logs.activityLogs);
+        createLoginAudit(body)
+        logs.activityLogs = [];
+        logs.sessionTime.joinTime = getDateAndTime();
+        localStorage.setItem("logs",JSON.stringify(logs))
+    }
 
     if (window.history.length > 2) localStorage.removeItem("homeButtonClicked");
 
-   
+    if(router.pathname == "/" && localStorage.getItem("token"))
+    dispatch(logActivity(`user has visited the home route`));
+    else if(localStorage.getItem("token"))
+    dispatch(logActivity(`user has visited the route, ${router.pathname}`))
+    
+    if(!localStorage.getItem("token"))localStorage.removeItem("logs");
   },[debouncedRouterPathname])
 
   useEffect(() => {
@@ -271,14 +221,11 @@ function MyApp({ Component, pageProps }) {
 
     // Event listener for tab close
     const onTabClose = () => {
-      console.log(window.closed,"window.close")
-
-      localStorage.setItem("window.close",window.closed)
       let tabsOpen = parseInt(localStorage.getItem("tabsOpen"));
       localStorage.setItem("previousTab",router.pathname)
       tabsOpen--;
 
-      if (tabsOpen === 0 && localStorage.getItem("token")) {
+      if (tabsOpen === 0) {
         // All tabs have been closed
         // Add your logic here
       }
@@ -294,20 +241,6 @@ function MyApp({ Component, pageProps }) {
     
         };
   }, []);
-
-useEffect(()=>{
-
-  if(router.pathname == "/" && localStorage.getItem("token"))
-  dispatch(logActivity(`user has visited the home route`));
-  else if(localStorage.getItem("token"))
-  dispatch(logActivity(`user has visited the route, ${router.pathname}`))
-  
-  if(!localStorage.getItem("token")){
-    localStorage.removeItem("logs");
-    localStorage.removeItem("logid")
-  }
-
-},[debouncedRouterPathname])
   
   return (
     <>
