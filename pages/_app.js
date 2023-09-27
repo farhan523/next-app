@@ -33,7 +33,6 @@ import {
   setIpAddress,
   setSessionLeaveTime
 } from "../store/sessionAudit.reducer";
-import { NULL } from "sass";
 
 function MyApp({ Component, pageProps }) {
   // const {
