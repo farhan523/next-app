@@ -281,14 +281,6 @@ function MyApp({ Component, pageProps }) {
       if (tabsOpen === 0 && localStorage.getItem("token")) {
         // All tabs have been closed
         // Add your logic here
-        let logs = localStorage.getItem("logs");
-        if(logs){
-          logs = JSON.parse(logs);
-          console.log("tabCloseLogs",logs)
-          sendLogsToDatabase(logs)
-        
-          localStorage.setItem("tabClosed",JSON.stringify(logs))
-        }
       }
 
       localStorage.setItem("tabsOpen", tabsOpen.toString());
