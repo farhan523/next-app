@@ -6,8 +6,8 @@ function getUserAgentAndOperatingSystem() {
     var osMap = {
       Windows: /Windows/i,
       Macintosh: /Macintosh/i,
-      Linux: /Linux/i,
       Android: /Android/i,
+      Linux: /Linux/i,
       iOS: /iPhone|iPad|iPod/i, // Detect iOS devices
     };
     
