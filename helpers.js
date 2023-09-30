@@ -7,8 +7,9 @@ function getUserAgentAndOperatingSystem() {
       Windows: /Windows/i,
       Macintosh: /Macintosh/i,
       Android: /Android/i,
+      iOS: /iPhone|iPad|iPod/i,
       Linux: /Linux/i,
-      iOS: /iPhone|iPad|iPod/i, // Detect iOS devices
+       // Detect iOS devices
     };
     
     // Initialize the OS as "Unknown" by default
