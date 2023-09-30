@@ -47,7 +47,26 @@ function getUserAgentAndOperatingSystem() {
     return dateTime;
   }
   
+  function parseCustomDateString(dateString) {
+    const parts = dateString.split(/[ :]/); // Split by ' ' and ':'
+    const date = parts[0].split(/[-]/);
+    const year = parseInt(date[0]);
+    const month = parseInt(date[1]) - 1; // Months are 0-based in JavaScript
+    const day = parseInt(date[2]);
+    const hour = parseInt(parts[1]);
+    const minute = parseInt(parts[2]);
+    const second = parseInt(parts[3]);
+    console.log("date",parts,"and",date)
+    return new Date(year, month, day, hour, minute, second);
+  }
+  
+  function toISODateString(date) {
+    return date.toISOString();
+  }
+
   module.exports = {
     getDateAndTime,
     getUserAgentAndOperatingSystem,
+    parseCustomDateString,
+    toISODateString
   };

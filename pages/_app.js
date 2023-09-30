@@ -31,7 +31,8 @@ import {
   setSessionJoinTime,
   logActivity,
   setIpAddress,
-  setSessionLeaveTime
+  setSessionLeaveTime,
+  setStateToInitial
 } from "../store/sessionAudit.reducer";
 
 function MyApp({ Component, pageProps }) {
@@ -56,7 +57,7 @@ function MyApp({ Component, pageProps }) {
     if(logs)
         logs = JSON.parse(logs);
     if (
-      localStorage.getItem("tabsOpen") == 0 &&
+      (localStorage.getItem("tabsOpen") == 0 || localStorage.getItem("tabsOpen") == 1) &&
       performance.getEntriesByType("navigation")[0].type == "navigate" &&
       (window.history.length == 2 || localStorage.getItem("previousTab") == "/login") &&
       !localStorage.getItem("homeButtonClicked") &&
@@ -87,7 +88,7 @@ function MyApp({ Component, pageProps }) {
           let seconds = Math.floor((diff % 60000) / 1000);
           logs.activityLogs[0] = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
           body.activityLogs = JSON.stringify(logs.activityLogs);
-          let currentLog = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`;
+          let currentLog = logs.activityLogs[0];
           
           (async function(){
             let logid = localStorage.getItem("logid");
@@ -97,16 +98,9 @@ function MyApp({ Component, pageProps }) {
             activityLogs.push(currentLog);
             activityLogs = JSON.stringify(activityLogs);
             updateLoginAudit(logid,activityLogs,body.leaveTime)
-            console.log(existingLog,"existingLog")
-        })()
-          logs = null;
-          localStorage.removeItem("logs");
-          localStorage.removeItem("logid")
 
-        }
-      }
-         
-      console.log("first time load ",logs)
+        })()
+          
       // body = {
       //   user_id: 1,
       //   browser: 'Chrome',
@@ -119,6 +113,14 @@ function MyApp({ Component, pageProps }) {
 
       
     }
+
+  }
+          logs = null;
+          console.log("logid removed here")
+          localStorage.removeItem("logs");
+          localStorage.removeItem("logid")
+
+}
 
     if(logs && logs.activityLogs.length != 0 && logs.user_id != null){
         let body = {};
@@ -141,7 +143,7 @@ function MyApp({ Component, pageProps }) {
 
         logs.activityLogs[0] = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
         body.activityLogs = JSON.stringify(logs.activityLogs);
-        let currentLog = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`;
+        let currentLog = logs.activityLogs[0];
         if(!localStorage.getItem("logid"))
             createLoginAudit(body)
           else{
@@ -153,7 +155,6 @@ function MyApp({ Component, pageProps }) {
                 activityLogs.push(currentLog);
                 activityLogs = JSON.stringify(activityLogs);
                 updateLoginAudit(logid,activityLogs,body.leaveTime)
-                console.log(existingLog,"existingLog")
             })()
           }
         logs.activityLogs = [];
@@ -164,12 +165,18 @@ function MyApp({ Component, pageProps }) {
 
     if (window.history.length > 2) localStorage.removeItem("homeButtonClicked");
 
-    if(router.pathname == "/" && localStorage.getItem("token"))
-    dispatch(logActivity(`user has visited the home route`));
-    else if(localStorage.getItem("token"))
-    dispatch(logActivity(`user has visited the route, ${router.pathname}`))
+      if(router.pathname == "/" && localStorage.getItem("token"))
+      dispatch(logActivity(`user has visited the home route`));
+      else if(localStorage.getItem("token"))
+      dispatch(logActivity(`user has visited the route, ${router.pathname}`))
     
-    if(!localStorage.getItem("token"))localStorage.removeItem("logs");
+    console.log("route change happen")
+    if(!localStorage.getItem("token")){
+      localStorage.removeItem("logs");
+      localStorage.removeItem("logid")
+      dispatch(setStateToInitial())
+    }
+    localStorage.setItem("previousTab",router.pathname)
   },[debouncedRouterPathname])
 
   useEffect(() => {
@@ -228,6 +235,35 @@ function MyApp({ Component, pageProps }) {
         let ipAddress = await fetch("/api/hello")
         ipAddress = await ipAddress.json();
         dispatch(setIpAddress(ipAddress.ip))
+
+        let logs = localStorage.getItem("logs");
+        logs = JSON.parse(logs)
+        console.log("logs",logs)
+        let body = {};
+        body.user = {id:JSON.parse(logs.user_id)};
+        body.user_id = JSON.parse(logs.user_id);
+        body.browser = logs.browser;
+        body.operatingSystem = logs.operatingSystem;
+        body.ipAddress = logs.ipAddress;
+        let parsedJoinTime = parseCustomDateString(logs.sessionTime.joinTime)
+        let parsedLeaveTime = parseCustomDateString(getDateAndTime())
+        const isoJoinTime = toISODateString(parsedJoinTime);
+        const isoLeaveTime = toISODateString(parsedLeaveTime);
+        body.joinTime = new Date(isoJoinTime);
+        body.leaveTime = new Date(isoLeaveTime);
+        let diff = body.leaveTime - body.joinTime;
+
+        let hours = Math.floor(diff / 3600000);
+        let minutes = Math.floor((diff % 3600000) / 60000);
+        let seconds = Math.floor((diff % 60000) / 1000);
+
+        let logToSend = `user has visited the route ${router.pathname == "/" ? "home" : router.pathname} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
+        body.activityLogs = JSON.stringify([logToSend]);
+      
+        await createLoginAudit(body);
+        dispatch(setSessionJoinTime(dateTime));
+      
+       
       }
     })();
     
@@ -254,15 +290,59 @@ function MyApp({ Component, pageProps }) {
     }
 
     // Event listener for tab close
-    const onTabClose = () => {
+    const onTabClose = (e) => {
+      
       let tabsOpen = parseInt(localStorage.getItem("tabsOpen"));
       localStorage.setItem("previousTab",router.pathname)
       tabsOpen--;
 
-      if (tabsOpen === 0) {
-        dispatch(setSessionLeaveTime(getDateAndTime()));
+      if (localStorage.getItem("logs")) {
+        // dispatch(setSessionLeaveTime(getDateAndTime()));
         // All tabs have been closed
         // Add your logic here
+       
+        let logs = localStorage.getItem("logs")
+        logs = JSON.parse(logs);
+        if(logs && logs.activityLogs.length != 0 && logs.user_id != null && localStorage.getItem("token")){
+          localStorage.setItem("beforeCloseRun",true)
+          let body = {};
+          body.user = {id:JSON.parse(logs.user_id)};
+          body.user_id = JSON.parse(logs.user_id);
+          body.browser = logs.browser;
+          body.operatingSystem = logs.operatingSystem;
+          body.ipAddress = logs.ipAddress;
+          let parsedJoinTime = parseCustomDateString(logs.sessionTime.joinTime)
+          let parsedLeaveTime = parseCustomDateString(getDateAndTime())
+          const isoJoinTime = toISODateString(parsedJoinTime);
+          const isoLeaveTime = toISODateString(parsedLeaveTime);
+          body.joinTime = new Date(isoJoinTime);
+          body.leaveTime = new Date(isoLeaveTime);
+          let diff = body.leaveTime - body.joinTime;
+  
+          let hours = Math.floor(diff / 3600000);
+          let minutes = Math.floor((diff % 3600000) / 60000);
+          let seconds = Math.floor((diff % 60000) / 1000);
+  
+          logs.activityLogs[0] = `${logs.activityLogs[0]} and has spent ${hours} hours and ${minutes} minutes and ${seconds} seconds`
+          body.activityLogs = JSON.stringify(logs.activityLogs);
+          let currentLog = logs.activityLogs[0];
+          if(!localStorage.getItem("logid"))
+              createLoginAudit(body)
+            else{
+              (async function(){
+                  let logid = localStorage.getItem("logid");
+                  logid = +logid;
+                  let activityLogs = JSON.parse(localStorage.getItem("previousdatabaselogs"));
+                  activityLogs.push(currentLog);
+                  activityLogs = JSON.stringify(activityLogs);
+                  localStorage.setItem("sendedLogs",activityLogs)
+                  await updateLoginAudit(logid,activityLogs,body.leaveTime)
+                  localStorage.setItem("logupdated","true")
+              })()
+            }
+          localStorage.removeItem("logs");
+          localStorage.removeItem("logid")
+      }
       }
 
       localStorage.setItem("tabsOpen", tabsOpen.toString());

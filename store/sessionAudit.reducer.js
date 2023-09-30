@@ -27,6 +27,8 @@ function setStateInLocalStorage(state, propertyToUpdate) {
     );
   else if (propertyToUpdate == "joinTime")
     existingState.sessionTime.joinTime = state.sessionTime.joinTime;
+  else if(propertyToUpdate == "leaveTime")
+  existingState.sessionTime.leaveTime = state.sessionTime.leaveTime;
   else existingState[propertyToUpdate] = state[propertyToUpdate];
   existingState.sessionTime.leaveTime = state.sessionTime.leaveTime;
   localStorage.setItem("logs", JSON.stringify(existingState));
@@ -37,7 +39,7 @@ const sessionAuditSlice = createSlice({
   initialState,
   reducers: {
     logActivity: (state, action) => {
-      state.activityLogs = [...state.activityLogs, action.payload];
+      state.activityLogs = [action.payload];
       state.sessionTime.leaveTime = getDateAndTime();
       setStateInLocalStorage(state, "activityLogs");
     },
@@ -63,11 +65,15 @@ const sessionAuditSlice = createSlice({
     },
     setSessionLeaveTime: (state, action) => {
       state.sessionTime.leaveTime = action.payload;
+      setStateInLocalStorage(state,"leaveTime")
     },
     setIpAddress:(state,action) =>{
       state.ipAddress = action.payload;
       state.sessionTime.leaveTime = getDateAndTime()
       setStateInLocalStorage(state, "ipAddress");
+    },
+    setStateToInitial:(state,action) =>{
+      state = initialState;
     }
   },
 });
@@ -81,5 +87,6 @@ export const {
   setOperatingSystem,
   setSessionJoinTime,
   setSessionLeaveTime,
-  setIpAddress
+  setIpAddress,
+  setStateToInitial
 } = sessionAuditSlice.actions;

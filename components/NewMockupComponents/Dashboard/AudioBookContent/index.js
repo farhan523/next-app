@@ -37,7 +37,7 @@ export const AudioBookContent = ({
   const [currentChapterLength, setCurrentChapterLength] = useState(0);
   const [recentPlayAudio, setRecentPlayAudio] = useState(null);
   const [showLoading, setShowLoading] = useState(false);
-
+  
   useEffect(() => {
     const storedData = localStorage.getItem("recentPlayAudio");
     setRecentPlayAudio(storedData ? JSON.parse(storedData) : null);
@@ -187,7 +187,7 @@ export const AudioBookContent = ({
                         showPlayerPlay(recentPlayAudio);
                         setHandleButtonClicked(recentPlayAudio?.id);
                         setPlayStatus(!playStatus);
-                      }}
+                                              }}
                     >
                       <div className="h-fit flex sm:flex-row flex-col items-center sm:justify-start justify-center text-center sm:text-left">
                         <img
@@ -376,7 +376,7 @@ export const AudioBookContent = ({
                                         </p>
                                       </Link>
                                     </div>
-                                    <div className="overflow-auto w-[660px]">
+                                    <div className="overflow-auto playerListWidth" >
                                       <div className="flex gap-5 overflow-x-auto">
                                         {card.map((singleCard, index) => {
                                           {
@@ -402,7 +402,7 @@ export const AudioBookContent = ({
                                               showPlayerPlay={() =>
                                                 showPlayerPlay(singleCard)
                                               }
-                                              currentID={currentID}
+                                                                                            currentID={currentID}
                                               individualAudioData={
                                                 individualAudioData
                                               }
@@ -462,7 +462,7 @@ export const AudioBookContent = ({
                                         </p>
                                       </Link>
                                     </div>
-                                    <div className="overflow-auto w-[660px]">
+                                    <div className="overflow-auto .playerListWidth">
                                       <div className="flex gap-5 overflow-x-auto">
                                         {card.map((singleCard, index) => {
                                           {
@@ -488,7 +488,7 @@ export const AudioBookContent = ({
                                               showPlayerPlay={() =>
                                                 showPlayerPlay(singleCard)
                                               }
-                                              currentID={currentID}
+                                                                                            currentID={currentID}
                                               individualAudioData={
                                                 individualAudioData
                                               }

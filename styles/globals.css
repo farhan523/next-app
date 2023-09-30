@@ -893,3 +893,22 @@ button[aria-label="Go to next step"] svg {
   position: relative;
   cursor: pointer;
 }
+
+
+/* on listen page  */
+
+.playerListWidth{
+  width: 660px;
+}
+
+@media screen and (max-width:1500px){
+    .playerListWidth{
+      width: 530px;
+    }
+}
+
+@media screen and (max-width:1223px){
+  .playerListWidth{
+    width: 330px;
+  }
+}
