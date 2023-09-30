@@ -59,7 +59,7 @@ function MyApp({ Component, pageProps }) {
     if (
       (localStorage.getItem("tabsOpen") == 0 || localStorage.getItem("tabsOpen") == 1) &&
       performance.getEntriesByType("navigation")[0].type == "navigate" &&
-      (window.history.length == 2 || localStorage.getItem("previousTab") == "/login") &&
+      (!localStorage.getItem("alreadyCalledThis") || localStorage.getItem("previousTab") == "/login") &&
       !localStorage.getItem("homeButtonClicked") &&
       localStorage.getItem("token")
     ) {
@@ -177,6 +177,7 @@ function MyApp({ Component, pageProps }) {
       dispatch(setStateToInitial())
     }
     localStorage.setItem("previousTab",router.pathname)
+    localStorage.setItem("alreadyCalledThis","true");
   },[debouncedRouterPathname])
 
   useEffect(() => {
@@ -291,7 +292,7 @@ function MyApp({ Component, pageProps }) {
 
     // Event listener for tab close
     const onTabClose = (e) => {
-      
+      localStorage.removeItem("alreadyCalledThis")
       let tabsOpen = parseInt(localStorage.getItem("tabsOpen"));
       localStorage.setItem("previousTab",router.pathname)
       tabsOpen--;
