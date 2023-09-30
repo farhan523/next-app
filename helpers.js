@@ -3,20 +3,25 @@ function getUserAgentAndOperatingSystem() {
     var userAgent = navigator.userAgent;
   
     // Check for the operating system
-    let os;
-    if (userAgent.match(/Windows/)) {
-      os = "Windows";
-    } else if (userAgent.match(/Macintosh/)) {
-      os = "Macintosh";
-    } else if (userAgent.match(/Linux/)) {
-      os = "Linux";
-    } else if (userAgent.match(/Android/)) {
-      os = "Android";
-    } else if (userAgent.match(/iOS/)) {
-      os = "iOS";
-    } else {
-      os = "Unknown";
+    var osMap = {
+      Windows: /Windows/i,
+      Macintosh: /Macintosh/i,
+      Linux: /Linux/i,
+      Android: /Android/i,
+      iOS: /iPhone|iPad|iPod/i, // Detect iOS devices
+    };
+    
+    // Initialize the OS as "Unknown" by default
+  var os = "Unknown";
+
+  // Loop through the OS map and check for matches
+  for (var osName in osMap) {
+    if (osMap[osName].test(userAgent)) {
+      os = osName;
+      break; // Exit the loop when a match is found
     }
+  }
+
   
     // Check for the browser
     var browser;
